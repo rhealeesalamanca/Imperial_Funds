@@ -7,7 +7,7 @@ updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
 ADMIN
-username: admin1
+username: admin
 password: 123456
 
 CREATE TABLE tblRequest (

@@ -162,9 +162,9 @@ if(isset($_POST["id"]) && !empty($_POST["id"])){
                 <form action="<?php echo htmlspecialchars(basename($_SERVER['REQUEST_URI'])); ?>" method="post">
                     <div class="row">
                         <div class="col col-md-3 col-lg-3 col-12 pb-2">
-                            <label>Funds</label>
-                            <input type="text" name="Funds" value="<?php echo htmlspecialchars($Funds); ?>">
-                            <span><?php echo $Funds_err; ?></span>
+                            <label style="font-size:small;">Funds:</label>
+                            <input type="number" name="Funds" class="form-control uppercase-input <?php echo (!empty($Funds_err)) ? 'is-invalid' : ''; ?>" value="<?php echo $Funds; ?>" min="1900" step="1">
+                            <span class="invalid-feedback"><?php echo $Funds_err;?></span>
                         </div>
                         <div class="col col-md-3 col-lg-3 col-12 pb-2"> 
                             <label style="font-size:small;">Year:</label>

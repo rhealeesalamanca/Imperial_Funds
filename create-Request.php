@@ -1,95 +1,92 @@
 <?php
-// Include config file
+// Include database connection
 require_once "config.php";
 
-// Define variables and initialize with empty values
-$Budget = $Name = $Purpose = $DepartmentId = "";
-$Budget_err = $Name_err = $Purpose_err = $DepartmentId_err = "";
-
+// Initialize variables
+$Name = $Budget = $Purpose = $DepartmentId = "";
+$Name_err = $Budget_err = $Purpose_err = $DepartmentId_err = "";
 $page_err = "";
 
-// Fetching Department Ids from another table
-$departmentIds = array();
-$sqlDepartmentIds = "SELECT DepartmentId, DepartmentName FROM tblDepartment ORDER BY DepartmentName ASC";
-$resultDepartmentIds = $mysqli->query($sqlDepartmentIds);
-
-while ($rowDepartmentIds = $resultDepartmentIds->fetch_assoc()) {
-    $id = $rowDepartmentIds['DepartmentId'];
-    $dept = $rowDepartmentIds['DepartmentName'];
-    $departmentIds[$id] = $dept;
+// Fetch Department IDs for the dropdown
+$departmentIds = [];
+$sql = "SELECT DepartmentId, DepartmentName FROM tblDepartment";
+$result = $mysqli->query($sql);
+if ($result->num_rows > 0) {
+    while ($row = $result->fetch_assoc()) {
+        $departmentIds[$row["DepartmentId"]] = $row["DepartmentName"];
+    }
 }
 
-// Processing form data when form is submitted
+// Process form submission
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-
     // Validate Budget
-    $input_Budget = trim($_POST["Budget"]);
-    if (empty($input_Budget)) {
-        $Budget_err = "Do not leave empty!";
-    } elseif (!is_numeric($input_Budget) || $input_Budget < 0) {
-        $Budget_err = "Enter a valid number!";
+    if (empty(trim($_POST["Budget"]))) {
+        $Budget_err = "Please enter a budget amount.";
+    } elseif (!is_numeric($_POST["Budget"]) || $_POST["Budget"] <= 0) {
+        $Budget_err = "Enter a valid budget amount.";
     } else {
-        $Budget = floatval($input_Budget);
+        $Budget = $_POST["Budget"];
     }
 
     // Validate Name
-    $input_Name = trim($_POST["Name"]);
-    if(empty($input_Name)){
-        $Name_err = "Do not leave empty!";
-    } elseif(!preg_match("/^[A-Za-z\s]+$/", $input_Name)){
-        $Name_err = "Only letters and spaces are allowed.";
+    if (empty(trim($_POST["Name"]))) {
+        $Name_err = "Please enter a name.";
     } else {
-        $Name = strtoupper($input_Name); // Convert to uppercase
+        $Name = strtoupper(trim($_POST["Name"]));
     }
 
     // Validate Purpose
-    $input_Purpose = trim($_POST["Purpose"]);
-    if (empty($input_Purpose)) {
-        $Purpose_err = "Do not leave empty!";
+    if (empty(trim($_POST["Purpose"]))) {
+        $Purpose_err = "Please enter the purpose.";
     } else {
-        $Purpose = strtoupper($input_Purpose);
+        $Purpose = trim($_POST["Purpose"]);
     }
 
-    // Validate DepartmentId
-    $input_DepartmentId = trim($_POST["DepartmentId"]);
-    if (empty($input_DepartmentId)) {
-        $DepartmentId_err = "Do not leave empty!";
-    } elseif (!ctype_digit($input_DepartmentId) || !array_key_exists($input_DepartmentId, $departmentIds)) {
-        $DepartmentId_err = "Invalid Department ID!";
+    // Validate Department
+    if (empty($_POST["DepartmentId"])) {
+        $DepartmentId_err = "Please select a department.";
     } else {
-        $DepartmentId = intval($input_DepartmentId);
+        $DepartmentId = $_POST["DepartmentId"];
     }
 
-    // Check input errors before inserting into the database
+    // Check for errors before inserting
     if (empty($Budget_err) && empty($Name_err) && empty($Purpose_err) && empty($DepartmentId_err)) {
-
-        // Prepare an insert statement
-        $sql = "INSERT INTO tblRequest (Budget, Name, Purpose, DepartmentId) VALUES (?, ?, ?, ?)";
-        if ($stmt = $mysqli->prepare($sql)) {
-
-            // Bind variables to the prepared statement as parameters
-            $stmt->bind_param("dsss", $param_Budget, $param_Name, $param_Purpose, $param_DepartmentId);
-
-            // Set parameters
-            $param_Budget = $Budget;
-            $param_Name = $Name;
-            $param_Purpose = $Purpose;
-            $param_DepartmentId = $DepartmentId;
-
-            // Attempt to execute the prepared statement
-            if ($stmt->execute()) {
-                // Records created successfully. Redirect to landing page
-                $page_err = "<p style='color:green;'>Successfully inserted data!</p>";
-            } else {
-                $page_err = "<p style='color:red;'>Oops! Error inserting data into the database!</p>";
-            }
+        // Check available yearly funds
+        $fundQuery = "SELECT Funds FROM tblYearlyFunds WHERE DepartmentId = ? ORDER BY Year DESC LIMIT 1";
+        if ($stmt = $mysqli->prepare($fundQuery)) {
+            $stmt->bind_param("i", $DepartmentId);
+            $stmt->execute();
+            $stmt->bind_result($availableFunds);
+            $stmt->fetch();
+            $stmt->close();
         }
 
-        // Close statement
-        $stmt->close();
-    }
+        if ($availableFunds >= $Budget) {
+            // Insert request
+            $sql = "INSERT INTO tblRequest (Name, Budget, Purpose, DepartmentId) VALUES (?, ?, ?, ?)";
+            if ($stmt = $mysqli->prepare($sql)) {
+                $stmt->bind_param("sdsi", $Name, $Budget, $Purpose, $DepartmentId);
+                if ($stmt->execute()) {
+                    // Deduct budget from yearly funds
+                    $updateFunds = "UPDATE tblYearlyFunds SET Funds = Funds - ? WHERE DepartmentId = ? ORDER BY Year DESC LIMIT 1";
+                    if ($stmt2 = $mysqli->prepare($updateFunds)) {
+                        $stmt2->bind_param("di", $Budget, $DepartmentId);
+                        $stmt2->execute();
+                        $stmt2->close();
+                    }
 
-    // Close connection
+                    // Redirect to manage request page
+                    header("location: manage-Request.php");
+                    exit();
+                } else {
+                    $page_err = "<div class='alert alert-danger'>Something went wrong. Please try again.</div>";
+                }
+                $stmt->close();
+            }
+        } else {
+            $page_err = "<div class='alert alert-warning'>Insufficient funds in the selected department.</div>";
+        }
+    }
     $mysqli->close();
 }
 ?>
@@ -204,5 +201,4 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
     </style>
 </body>
-
 </html>

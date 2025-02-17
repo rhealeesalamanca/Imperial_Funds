@@ -18,16 +18,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $DepartmentName = strtoupper($input_DepartmentName);
     }
 
-    // Validate CurrentFunds (Must be a number)
-    $input_CurrentFunds = trim($_POST["CurrentFunds"]);
-    if (empty($input_CurrentFunds)) {
-        $CurrentFunds_err = "Do not leave empty!";
-    } elseif (!is_numeric($input_CurrentFunds)) {
-        $CurrentFunds_err = "Enter a valid number!";
-    } else {
-        $CurrentFunds = floatval($input_CurrentFunds); // Convert to float
-    }
-
     // Check input errors before inserting into the database
     if (empty($DepartmentName_err) && empty($CurrentFunds_err)) {
 
@@ -88,11 +78,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             
                 <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">           
                     <div class="row">
-                        <div class="col col-md-4 col-lg-4 col-12 pb-2"> 
-                            <label style="font-size:small;">Current Funds:</label>
-                            <input type="number" name="CurrentFunds" class="form-control uppercase-input <?php echo (!empty($CurrentFunds_err)) ? 'is-invalid' : ''; ?>" value="<?php echo $CurrentFunds; ?>" step="0.01">
-                            <span class="invalid-feedback"><?php echo $CurrentFunds_err;?></span>
-                        </div>
                         <div class="col col-md-8 col-lg-8 col-12 pb-2">
                             <label style="font-size:small;">Department Name:</label>
                             <input type="text" name="DepartmentName" class="form-control uppercase-input <?php echo (!empty($DepartmentName_err)) ? 'is-invalid' : ''; ?>" value="<?php echo $DepartmentName; ?>">

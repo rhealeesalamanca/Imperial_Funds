@@ -5,19 +5,19 @@ if(isset($_POST["id"]) && !empty($_POST["id"])){
     require_once "config.php";
     
     // Prepare a delete statement
-    $sql = "DELETE FROM tblStudent WHERE StudentId = ?";
+    $sql = "DELETE FROM tblRequest WHERE RequestId = ?";
     
     if($stmt = $mysqli->prepare($sql)){
         // Bind variables to the prepared statement as parameters
-        $stmt->bind_param("i", $param_StudentId);
+        $stmt->bind_param("i", $param_RequestId);
         
         // Set parameters
-        $param_StudentId = trim($_POST["id"]);
+        $param_RequestId = trim($_POST["id"]);
         
         // Attempt to execute the prepared statement
         if($stmt->execute()){
             // Records deleted successfully. Redirect to landing page
-            header("location: manage-Student.php");
+            header("location: manage-Request.php");
             exit();
         } else{
             echo "Oops! Something went wrong. Please try again later.";
@@ -56,12 +56,11 @@ if(isset($_POST["id"]) && !empty($_POST["id"])){
                                 <p style="color: black;">Are you sure you want to delete this record?</p>
                                 <p>
                                     <input type="submit" value="Yes" class="btn btn-outline-danger">
-                                    <a href="manage-Student.php" class="btn btn-outline-secondary ml-2">No</a>
+                                    <a href="manage-Request.php" class="btn btn-outline-secondary ml-2">No</a>
                                 </p>
                             </div>
                             </form>
                         </div>
-
                     </div>
                 </div>        
             </div>

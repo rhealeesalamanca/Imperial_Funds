@@ -69,7 +69,6 @@
                                 echo "<thead>";
                                     echo "<tr>";
                                     echo "<th>#</th>";
-                                    echo "<th>Current Funds</th>";
                                     echo "<th>Department Name</th>";
                                     echo "<th>Action</th>";
                                     echo "</tr>";
@@ -81,7 +80,6 @@
                                 while($row = $result->fetch_array()){
                                     echo "<tr>";
                                         echo "<td>" . $count . "</td>";
-                                        echo "<td>" . $row['CurrentFunds'] . "</td>";
                                         echo "<td>" . $row['DepartmentName'] . "</td>";
                                         echo "<td>";
                                         echo '<a href="update-Department.php?id='. $row['DepartmentId'] .'" class="mr-3" title="Update Record" data-toggle="tooltip"><span class="bi bi-pencil-square text-success";></span></a>';

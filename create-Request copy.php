@@ -1,10 +1,12 @@
 <?php
 // Include config file
 require_once "config.php";
- 
+
 // Define variables and initialize with empty values
 $Budget = $Name = $Purpose = $DepartmentId = "";
 $Budget_err = $Name_err = $Purpose_err = $DepartmentId_err = "";
+
+$page_err = "";
 
 // Fetching Department Ids from another table
 $departmentIds = array();
@@ -16,12 +18,10 @@ while ($rowDepartmentIds = $resultDepartmentIds->fetch_assoc()) {
     $dept = $rowDepartmentIds['DepartmentName'];
     $departmentIds[$id] = $dept;
 }
- 
+
 // Processing form data when form is submitted
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // Get hidden input value
-    $RequestId = $_POST["id"];
-    
+
     // Validate Budget
     $input_Budget = trim($_POST["Budget"]);
     if (empty($input_Budget)) {
@@ -59,90 +59,39 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     } else {
         $DepartmentId = intval($input_DepartmentId);
     }
-    
-    // Check input errors before inserting in database
+
+    // Check input errors before inserting into the database
     if (empty($Budget_err) && empty($Name_err) && empty($Purpose_err) && empty($DepartmentId_err)) {
 
-        // Prepare an update statement
-        $sql = "UPDATE tblRequest SET Budget=?, Name=?, Purpose=?, DepartmentId=? WHERE RequestId=?";
-
+        // Prepare an insert statement
+        $sql = "INSERT INTO tblRequest (Budget, Name, Purpose, DepartmentId) VALUES (?, ?, ?, ?)";
         if ($stmt = $mysqli->prepare($sql)) {
+
             // Bind variables to the prepared statement as parameters
-            $stmt->bind_param("dssii", $param_Budget, $param_Name, $param_Purpose, $param_DepartmentId, $param_RequestId);
+            $stmt->bind_param("dsss", $param_Budget, $param_Name, $param_Purpose, $param_DepartmentId);
 
             // Set parameters
             $param_Budget = $Budget;
             $param_Name = $Name;
             $param_Purpose = $Purpose;
             $param_DepartmentId = $DepartmentId;
-            $param_RequestId = $RequestId; // Add this line to set the fifth parameter
-            
+
             // Attempt to execute the prepared statement
-            if($stmt->execute()){
-                // Records updated successfully. Redirect to landing page
-                header("location: manage-Request.php");
-                exit();
-            } else{
-                echo "Oops! Something went wrong. Please try again later.";
+            if ($stmt->execute()) {
+                // Records created successfully. Redirect to landing page
+                $page_err = "<p style='color:green;'>Successfully inserted data!</p>";
+            } else {
+                $page_err = "<p style='color:red;'>Oops! Error inserting data into the database!</p>";
             }
         }
-         
+
         // Close statement
         $stmt->close();
     }
-    
+
     // Close connection
     $mysqli->close();
-
-    // Check existence of id parameter before processing further
-} elseif (isset($_GET["id"]) && !empty(trim($_GET["id"]))) {
-        // Get URL parameter
-        $RequestId = trim($_GET["id"]);
-        
-        // Prepare a select statement
-        $sql = "SELECT * FROM tblRequest WHERE RequestId = ?";
-        if ($stmt = $mysqli->prepare($sql)) {
-            // Bind variables to the prepared statement as parameters
-            $stmt->bind_param("i", $param_RequestId);
-            
-            // Set parameters
-            $param_RequestId = $RequestId;
-            
-            // Attempt to execute the prepared statement
-            if($stmt->execute()){
-                $result = $stmt->get_result();
-                
-                if($result->num_rows == 1){
-                    /* Fetch result row as an associative array. Since the result set
-                    contains only one row, we don't need to use while loop */
-                    $row = $result->fetch_array(MYSQLI_ASSOC);
-                    
-                    // Retrieve individual field value
-                    $Budget = $row["Budget"];
-                    $Name = $row["Name"];
-                    $Purpose = $row["Purpose"];
-                    $Department = $row["DepartmentId"];
-                } else{
-                    // URL doesn't contain valid id. Redirect to error page
-                    header("location: error.php");
-                    exit();
-                }
-                
-            } else{
-                echo "Oops! Something went wrong. Please try again later.";
-            }
-        }
-        
-        // Close statement
-        $stmt->close();
-        
-        // Close connection
-        $mysqli->close();
-    }  else{
-        // URL doesn't contain id parameter. Redirect to error page
-        header("location: error.php");
-        exit();
-    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -152,8 +101,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <body>
     <div class="wrapper">
 
-       <!-- Sidebar Holder -->
-       <?php include('includes/sidebar.php');?> 
+        <!-- Sidebar Holder -->
+        <?php include('includes/sidebar.php');?> 
 
         <!-- Page Content Holder -->
         <div id="content">
@@ -161,17 +110,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
             <!-- Jumbotron -->
             <div class="p-4 shadow-4 rounded-3" style="background-color:#12081B;">
-                <h2>UPDATE EXISTING RECORD</h2>                  
+                <h2>CREATE NEW RECORD</h2>                  
                 <hr class="my-4" />
-                <small style="font-size: small; color: #47748b;" class="pt-3 pb-2"><a href="index.php" class="text-light"><i class="fa-solid fa-house"></i><b>&nbsp;&nbsp;DASHBOARD</b></a>  &nbsp;&#124;&nbsp;  <i class=""></i><b>REQUESTS</b>  &nbsp;&#124;&nbsp;  <i class=""></i><b>Update Request</b></small>                                    
+                <small style="font-size: small; color: #47748b;" class="pt-3 pb-2"><a href="index.php" class="text-light"><i class="fa-solid fa-house"></i><b>&nbsp;&nbsp;DASHBOARD</b></a>  &nbsp;&#124;&nbsp;  <i class=""></i><b>REQUESTS</b>  &nbsp;&#124;&nbsp;  <i class=""></i><b>Add Request</b></small>                                    
             </div>
 
             <!-- Home -->
             <div class="container text-light">
-                <h3 style="color:#3b72f9;" class="pt-4">UPDATE REQUEST</h3>
-                <p>Please edit the input values and submit to update the record.</p>
-                        
-                <form action="<?php echo htmlspecialchars(basename($_SERVER['REQUEST_URI'])); ?>" method="post">
+                <h3 style="color:#3b72f9;" class="pt-4">ADD REQUEST</h3>
+                <?php echo $page_err;?>
+            
+                <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post" enctype="multipart/form-data">
                     <div class="row">
                         <div class="col col-md-4 col-lg-4 col-12 pb-2">
                             <label style="font-size:small;">Budget:</label>
@@ -209,12 +158,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             <span class="invalid-feedback"><?php echo $DepartmentId_err; ?></span>
                         </div>
                     </div>
-
+ 
                     <div class="row">
                         <div class="col d-flex justify-content-between pt-3">
-                            <input type="hidden" name="id" value="<?php echo $RequestId; ?>"/>
                             <input type="submit" class="btn btn-primary" value="SUBMIT">
-                            <a class="btn btn-outline-secondary" href="manage-Request.php">CANCEL</a>
+                            <a class="btn btn-outline-secondary" href="manage-Request.php">MANAGE REQUEST</a>
                         </div>
                     </div>
                 </form>
@@ -244,7 +192,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             this.value = this.value.toUpperCase();
         });
     </script>
-    
+
     <style>
     .uppercase-input {
         text-transform: uppercase;
@@ -256,4 +204,5 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
     </style>
 </body>
+
 </html>
