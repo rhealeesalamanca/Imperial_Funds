@@ -93,47 +93,57 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 
 <!DOCTYPE html>
-<html>
-<!-- Head -->  
-<?php include('includes/head.php');?> 
-<body>
+<html lang="en">
+
+<!-- Head -->
+<?php include('includes/head.php'); ?>
+
+<body style="background-color: #fefae0;">
     <div class="wrapper">
-        
+
         <!-- Sidebar Holder -->
-        <?php include('includes/sidebar.php');?> 
+        <?php include('includes/sidebar.php'); ?>
 
         <!-- Page Content Holder -->
         <div id="content">
-            <?php include('includes/navbar.php');?>
+            <?php include('includes/navbar.php'); ?>
 
-            <!-- Jumbotron -->
-            <div class="p-4 shadow-4 rounded-3" style="background-color:#12081B;">
-                <h2>CREATE NEW RECORD</h2>                
-                <hr class="my-4" />
-                <small style="font-size: small; color: #47748b;" class="pt-3 pb-2"><a href="index.php" class="text-light"><i class="fa-solid fa-house"></i><b>&nbsp;&nbsp;DASHBOARD</b></a>  &nbsp;&#124;&nbsp;  <i class=""></i><b>YEARLY FUNDS</b>  &nbsp;&#124;&nbsp;  <i class=""></i><b>Add Yearly Fund</b></small>                                    
+            <!-- Header Section -->
+            <div class="p-4 shadow rounded-4 mb-4" style="background: linear-gradient(90deg, #FFD42A, #FFA500);">
+                <h2 class="text-dark fw-bold">CREATE NEW RECORD</h2>
+                <hr class="my-3" />
+                <small class="d-block text-dark">
+                    <a href="index.php" class="text-dark text-decoration-none">
+                        <i class="fa-solid fa-house"></i> <b>DASHBOARD</b>
+                    </a> &nbsp;|&nbsp;
+                    <b>YEARLY FUND</b> &nbsp;|&nbsp;
+                    <b>ADD YEARLY FUND</b>
+                </small>
             </div>
 
-            <!-- Home -->
-            <div class="container text-light">
-                <h3 style="color:#3b72f9;" class="pt-4">CREATE YEARLY FUND</h3>
-                <?php echo $page_err;?>
-            
-                <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">           
-                    <div class="row"> 
-                        <div class="col col-md-3 col-lg-3 col-12 pb-2">
-                            <label style="font-size:small;">Fund:</label>
-                            <input type="number" name="Funds" class="form-control uppercase-input <?php echo (!empty($Funds_err)) ? 'is-invalid' : ''; ?>" value="<?php echo $Funds; ?>" step="0.01" min="0">
-                            <span class="invalid-feedback"><?php echo $Funds_err;?></span>
+            <!-- Form Section -->
+            <div class="container bg-white p-4 rounded-4 shadow-sm">
+                <h3 class="text-dark fw-bold">CREATE YEARLY FUNDS</h3>
+                <?php echo $page_err; ?>
+
+                <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post" class="pt-3">
+                    <div class="row">
+                        <div class="col-md-4 pb-3">
+                            <label class="form-label">Fund:</label>
+                            <input type="number" name="Funds" class="form-control rounded-3 <?php echo (!empty($Funds_err)) ? 'is-invalid' : ''; ?>" value="<?php echo $Funds; ?>">
+                            <span class="invalid-feedback"><?php echo $Funds_err; ?></span>
                         </div>
-                        <div class="col col-md-3 col-lg-3 col-12 pb-2"> 
-                            <label style="font-size:small;">Year:</label>
-                            <input type="text" name="Year" class="form-control uppercase-input <?php echo (!empty($Year_err)) ? 'is-invalid' : ''; ?>" value="<?php echo $Year; ?>" pattern="^\d{4}$" placeholder="YYYY" title="Year should be a 4-digit number (YYYY)">
-                            <span class="invalid-feedback"><?php echo $Year_err;?></span>
+
+                        <div class="col-md-4 pb-3">
+                            <label class="form-label">Year:</label>
+                            <input type="text" name="Year" class="form-control rounded-3 <?php echo (!empty($Year_err)) ? 'is-invalid' : ''; ?>" value="<?php echo $Year; ?>" placeholder="YYYY" pattern="\d{4}" title="Enter a 4-digit year">
+                            <span class="invalid-feedback"><?php echo $Year_err; ?></span>
                         </div>
-                        <div class="col col-md-6 col-lg-6 col-12 pb-2">
-                            <label style="font-size:small;">Department:</label>
-                            <select name="DepartmentId" class="form-control <?php echo (!empty($DepartmentId_err)) ? 'is-invalid' : ''; ?>">
-                                <option value="" selected disabled><--Select Department--></option>
+
+                        <div class="col-md-4 pb-3">
+                            <label class="form-label">Department:</label>
+                            <select name="DepartmentId" class="form-control rounded-3 <?php echo (!empty($DepartmentId_err)) ? 'is-invalid' : ''; ?>">
+                                <option value="" selected disabled>← Select Department →</option>
                                 <?php foreach ($departmentIds as $id => $dept) : ?>
                                     <option value="<?php echo $id; ?>" <?php echo ($DepartmentId == $id) ? 'selected' : ''; ?>><?php echo $dept; ?></option>
                                 <?php endforeach; ?>
@@ -141,17 +151,44 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             <span class="invalid-feedback"><?php echo $DepartmentId_err; ?></span>
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="col d-flex justify-content-between pt-3">
-                            <input type="submit" class="btn btn-primary" value="SUBMIT">
-                            <a class="btn btn-outline-secondary" href="manage-YearlyFunds.php">MANAGE YEARLY FUNDS</a>
-                        </div>
+
+                    <div class="d-flex justify-content-between pt-4">
+                        <button type="submit" class="btn btn-secondary rounded-3 px-4">SUBMIT</button>
+                        <a href="manage-YearlyFunds.php" class="btn btn-outline-secondary rounded-3 px-4">MANAGE YEARLY FUNDS</a>
                     </div>
                 </form>
             </div>
-
         </div>
     </div>
+
+    <!-- Custom CSS -->
+    <style>
+        .shadow {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .rounded-4 {
+            border-radius: 1rem;
+        }
+
+        .form-label {
+            font-weight: 600;
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+
+        .btn-outline-secondary:hover {
+            background-color: #6c757d;
+            color: #fff;
+        }
+    </style>
 
     <!-- jQuery CDN - Slim version (=without AJAX) -->
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
@@ -187,5 +224,4 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
     </style>
 </body>
-
 </html>

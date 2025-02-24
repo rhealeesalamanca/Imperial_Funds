@@ -46,7 +46,7 @@ function getCount($table, $mysqli) {
             <div class ="container">
                 <div class="row pt-1 pb-4">
                     <div class="col-md-4 col-lg-4 col-12">
-                        <div class="card bg-primary text-white">
+                        <div class="card text-dark" style="background: linear-gradient(to right, #FFA500, #FFD700);">
                             <div class="card-body">
                                 <div class="row">
                                     <div class="col-md-5 col-lg-4 col-7">
@@ -54,41 +54,41 @@ function getCount($table, $mysqli) {
                                     </div>
                                     <div class="col-md-7 col-lg-7 col-7 justify-content-center ms-4">
                                         <h1 style="font-size: 50px; line-height: 0.4;" class="pt-4"><?php echo getCount('tblRequest', $mysqli); ?></h1>
-                                        <h5 class="pt-2 text-white">REQUEST</h5>
+                                        <h5 class="pt-2 text-dark">REQUEST</h5>
                                     </div>
                                 </div>
                             </div>
                             <div class="card-footer d-flex bg-light text-dark">
                                 <a href="manage-Request.php" class="stretched-link"><b>View Details</b></a>
                                 <span class="ms-auto">
-                                <i class="bi bi-caret-right-fill text-primary"></i>
+                                <i class="bi bi-caret-right-fill text-dark"></i>
                                 </span>
                             </div>
                         </div>
                     </div>
                     <div class="col-md-4 col-lg-4 col-12">
-                        <div class="card bg-secondary text-white">
+                        <div class="card text-dark" style="background: linear-gradient(to right, #FFA500, #FFD700);">
                             <div class="card-body">
                                 <div class="row">
                                     <div class="col-md-5 col-lg-4 col-7">
-                                        <a class="bi bi-person-video3 ms-3" id="icon"></a>  
+                                        <a class="bi bi-cash-stack ms-3" id="icon"></a>  
                                     </div>
                                     <div class="col-md-7 col-lg-7 col-7 justify-content-center ms-4">
                                         <h1 style="font-size: 50px; line-height: 0.4;" class="pt-4"><?php echo getCount('tblYearlyFunds', $mysqli); ?></h1>
-                                        <h5 class="pt-2 text-white">YEARLY FUND</h5>
+                                        <h5 class="pt-2 text-dark">YEARLY FUND</h5>
                                     </div>
                                 </div>
                             </div>
                             <div class="card-footer d-flex bg-light text-dark">
                                 <a href="manage-YearlyFunds.php" class="stretched-link"><b>View Details</b></a>
                                 <span class="ms-auto">
-                                <i class="bi bi-caret-right-fill text-secondary"></i>
+                                <i class="bi bi-caret-right-fill text-dark"></i>
                                 </span>
                             </div>
                         </div>
                     </div>
                     <div class="col-md-4 col-lg-4 col-12">
-                        <div class="card bg-success text-white">
+                        <div class="card text-dark" style="background: linear-gradient(to right, #FFA500, #FFD700);">
                             <div class="card-body">
                                 <div class="row">
                                     <div class="col-md-5 col-lg-4 col-7">
@@ -96,14 +96,14 @@ function getCount($table, $mysqli) {
                                     </div>
                                     <div class="col-md-7 col-lg-7 col-7 justify-content-center ms-4">
                                         <h1 style="font-size: 50px; line-height: 0.4;" class="pt-4"><?php echo getCount('tblDepartment', $mysqli); ?></h1>
-                                        <h5 class="pt-2 text-white">DEPARTMENT</h5>
+                                        <h5 class="pt-2 text-dark">DEPARTMENT</h5>
                                     </div>
                                 </div>
                             </div>
                             <div class="card-footer d-flex bg-light text-dark">
                                 <a href="manage-Department.php" class="stretched-link"><b>View Details</b></a>
                                 <span class="ms-auto">
-                                <i class="bi bi-caret-right-fill text-success"></i>
+                                <i class="bi bi-caret-right-fill text-dark"></i>
                                 </span>
                             </div>
                         </div>
@@ -113,6 +113,7 @@ function getCount($table, $mysqli) {
 
         </div>
     </div>
+
 
     <!-- jQuery CDN - Slim version (=without AJAX) -->
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>

@@ -3,8 +3,8 @@
 require_once "config.php";
 
 // Define variables and initialize with empty values
-$DepartmentName = $CurrentFunds = "";
-$DepartmentName_err = $CurrentFunds_err = "";
+$DepartmentName = "";
+$DepartmentName_err = "";
 $page_err = ""; 
 
 // Processing form data when form is submitted
@@ -19,19 +19,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     // Check input errors before inserting into the database
-    if (empty($DepartmentName_err) && empty($CurrentFunds_err)) {
+    if (empty($DepartmentName_err)) {
 
         // Prepare an insert statement
-        $sql = "INSERT INTO tblDepartment (DepartmentName, CurrentFunds) VALUES (?, ?)";
+        $sql = "INSERT INTO tblDepartment (DepartmentName) VALUES (?)";
 
         if ($stmt = $mysqli->prepare($sql)) {
 
             // Bind variables to the prepared statement as parameters
-            $stmt->bind_param("sd", $param_DepartmentName, $param_CurrentFunds); // "s" = string, "d" = double (number)
+            $stmt->bind_param("s", $param_DepartmentName); // "s" = string, "d" = double (number)
 
             // Set parameters
             $param_DepartmentName = $DepartmentName;
-            $param_CurrentFunds = $CurrentFunds;
 
             // Attempt to execute the prepared statement
             if ($stmt->execute()) {
@@ -51,50 +50,84 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 ?>
 
 <!DOCTYPE html>
-<html>
-<!-- Head -->  
-<?php include('includes/head.php');?> 
-<body>
-    <div class="wrapper">
+<html lang="en">
 
+<!-- Head -->
+<?php include('includes/head.php'); ?>
+
+<body style="background-color: #fefae0;">
+    <div class="wrapper">
         <!-- Sidebar Holder -->
-        <?php include('includes/sidebar.php');?> 
+        <?php include('includes/sidebar.php'); ?>
 
         <!-- Page Content Holder -->
         <div id="content">
-            <?php include('includes/navbar.php');?>
+            <?php include('includes/navbar.php'); ?>
 
             <!-- Jumbotron -->
-            <div class="p-4 shadow-4 rounded-3" style="background-color:#12081B;">
-                <h2>CREATE NEW RECORD</h2>                  
-                <hr class="my-4" />
-                <small style="font-size: small; color: #47748b;" class="pt-3 pb-2"><a href="index.php" class="text-light"><i class="fa-solid fa-house"></i><b>&nbsp;&nbsp;DASHBOARD</b></a>  &nbsp;&#124;&nbsp;  <i class=""></i><b>DEPARTMENTS</b>  &nbsp;&#124;&nbsp;  <i class=""></i><b>Create Department</b></small>                                    
+            <div class="p-4 shadow rounded-4 mb-4" style="background: linear-gradient(90deg, #FFD42A, #FFA500);">
+                <h2 class="text-dark fw-bold">CREATE NEW RECORD</h2>
+                <hr class="my-3" />
+                <small class="d-block text-dark">
+                    <a href="index.php" class="text-dark text-decoration-none">
+                        <i class="fa-solid fa-house"></i> <b>DASHBOARD</b>
+                    </a> &nbsp;|&nbsp;
+                    <b>DEPARTMENT</b> &nbsp;|&nbsp;
+                    <b>Create Department</b>
+                </small>
             </div>
 
-            <!-- Home -->
-            <div class="container text-light">
-                <h3 style="color:#3b72f9;" class="pt-4">CREATE DEPARTMENT</h3>
-                <?php echo $page_err;?>
-            
-                <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">           
+            <!-- Form Section -->
+            <div class="container bg-white p-4 rounded-4 shadow-sm">
+                <h3 class="text-dark fw-bold">CREATE DEPARTMENT</h3>
+                <?php echo $page_err; ?>
+
+                <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post" class="pt-3">
                     <div class="row">
-                        <div class="col col-md-8 col-lg-8 col-12 pb-2">
-                            <label style="font-size:small;">Department Name:</label>
-                            <input type="text" name="DepartmentName" class="form-control uppercase-input <?php echo (!empty($DepartmentName_err)) ? 'is-invalid' : ''; ?>" value="<?php echo $DepartmentName; ?>">
-                            <span class="invalid-feedback"><?php echo $DepartmentName_err;?></span>
+                        <div class="col-md-12 pb-3">
+                            <label class="form-label">Department Name:</label>
+                            <input type="text" name="DepartmentName" class="form-control rounded-3 uppercase-input <?php echo (!empty($DepartmentName_err)) ? 'is-invalid' : ''; ?>" value="<?php echo $DepartmentName; ?>">
+                            <span class="invalid-feedback"><?php echo $DepartmentName_err; ?></span>
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="col d-flex justify-content-between pt-3">
-                            <input type="submit" class="btn btn-primary" value="SUBMIT">
-                            <a class="btn btn-outline-secondary" href="manage-Department.php">MANAGE DEPARTMENT</a>
-                        </div>
+
+                    <div class="d-flex justify-content-between pt-4">
+                        <button type="submit" class="btn btn-secondary rounded-3 px-4">SUBMIT</button>
+                        <a href="manage-Department.php" class="btn btn-outline-secondary rounded-3 px-4">MANAGE DEPARTMENTS</a>
                     </div>
                 </form>
             </div>
-
         </div>
     </div>
+
+    <!-- Custom CSS -->
+    <style>
+        .shadow {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .rounded-4 {
+            border-radius: 1rem;
+        }
+
+        .form-label {
+            font-weight: 600;
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+
+        .btn-outline-secondary:hover {
+            background-color: #6c757d;
+            color: #fff;
+        }
+    </style>
 
     <!-- jQuery CDN - Slim version (=without AJAX) -->
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
@@ -129,5 +162,4 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
     </style>
 </body>
-
 </html>

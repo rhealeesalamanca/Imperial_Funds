@@ -7,87 +7,92 @@ if(isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true){
     header("location: index.php");
     exit;
 }
- 
-// Include config file
+
+// Include database connection
 require_once "config.php";
- 
-// Define variables and initialize with empty values
-$username = $password = "";
-$username_err = $password_err = $login_err = "";
- 
-// Processing form data when form is submitted
-if($_SERVER["REQUEST_METHOD"] == "POST"){
- 
-    // Check if username is empty
-    if(empty(trim($_POST["username"]))){
-        $username_err = "Please enter username.";
-    } else{
-        $username = trim($_POST["username"]);
+
+// Initialize variables
+$email = $password = $department = "";
+$email_err = $password_err = $department_err = $login_err = "";
+
+// Fetch Department IDs for the dropdown
+$departments = [];
+$sql = "SELECT DepartmentId, DepartmentName FROM tbldepartment"; // Ensure table name is correct
+$result = $mysqli->query($sql);
+if ($result->num_rows > 0) {
+    while ($row = $result->fetch_assoc()) {
+        $departments[$row["DepartmentId"]] = $row["DepartmentName"];
+    }
+}
+
+// Process form when submitted
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    
+    // Validate email
+    if (empty(trim($_POST["email"]))) {
+        $email_err = "Please enter your email.";
+    } else {
+        $email = trim($_POST["email"]);
     }
     
-    // Check if password is empty
-    if(empty(trim($_POST["password"]))){
-        $password_err = "Please enter password.";
-    } else{
+    // Validate password
+    if (empty(trim($_POST["password"]))) {
+        $password_err = "Please enter your password.";
+    } else {
         $password = trim($_POST["password"]);
     }
+
+    // Validate department
+    if (empty($_POST["department"])) {
+        $department_err = "Please select your department.";
+    } else {
+        $department = (int)$_POST["department"]; // Ensure it's an integer
+    }
     
-    // Validate credentials
-    if(empty($username_err) && empty($password_err)){
-        // Prepare a select statement
-        $sql = "SELECT id, username, password FROM admin WHERE username = ?";
-        
-        if($stmt = $mysqli->prepare($sql)){
-            // Bind variables to the prepared statement as parameters
-            $stmt->bind_param("s", $param_username);
-            
-            // Set parameters
-            $param_username = $username;
-            
-            // Attempt to execute the prepared statement
-            if($stmt->execute()){
-                // Store result
+    // Check for errors before querying database
+    if (empty($email_err) && empty($password_err) && empty($department_err)) {
+        $sql = "SELECT Usersid, email, password, DepartmentId FROM users WHERE email = ? AND DepartmentId = ?";
+
+        if ($stmt = $mysqli->prepare($sql)) {
+            $stmt->bind_param("si", $param_email, $param_department);
+            $param_email = $email;
+            $param_department = $department;
+
+            if ($stmt->execute()) {
                 $stmt->store_result();
-                
-                // Check if username exists, if yes then verify password
-                if($stmt->num_rows == 1){                    
-                    // Bind result variables
-                    $stmt->bind_result($id, $username, $hashed_password);
-                    if($stmt->fetch()){
-                        if(password_verify($password, $hashed_password)){
-                            // Password is correct, so start a new session
+
+                // Check if user exists
+                if ($stmt->num_rows == 1) {
+                    $stmt->bind_result($id, $email, $hashed_password, $db_department);
+                    if ($stmt->fetch()) {
+                        if (password_verify($password, $hashed_password)) {
+                            // Start session and store user details
                             session_start();
-                            
-                            // Store data in session variables
                             $_SESSION["loggedin"] = true;
                             $_SESSION["id"] = $id;
-                            $_SESSION["username"] = $username;                            
-                            
-                            // Redirect user to welcome page
+                            $_SESSION["email"] = $email;
+                            $_SESSION["department_id"] = $db_department;
+
+                            // Redirect to user dashboard
                             header("location: index.php");
-                        } else{
-                            // Password is not valid, display a generic error message
-                            $login_err = "Invalid password.";
+                            exit;
+                        } else {
+                            $login_err = "Invalid password."; 
                         }
                     }
-                } else{
-                    // Username doesn't exist, display a generic error message
-                    $login_err = "Username doesn't exist.";
+                } else {
+                    $login_err = "No account found with this email and department.";
                 }
-            } else{
-                echo "Oops! Something went wrong. Please try again later.";
+            } else {
+                echo "Oops! Something went wrong. Please try again.";
             }
-
-            // Close statement
             $stmt->close();
         }
     }
-    
-    // Close connection
     $mysqli->close();
 }
 ?>
- 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -95,72 +100,72 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
     <title>LOGIN</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
-        body{ font: 14px; }
+        body { font: 14px; }
     </style>
 </head>
-
 <body>
-    <section class="vh-100" style="background-color: #041a26;">
+    <section class="vh-100" style="background-color:rgb(224, 114, 11);">
         <div class="container py-4 h-100">
             <div class="row d-flex justify-content-center align-items-center h-100">
-                <div class="col col-md-6 col-lg-6 col-12" >
-                    <div class="card" style="border-radius: 1rem; background-color: #0d2533;">
-                        <div class="row g-0">
-                            <div class="card-body p-4 p-lg-5 text-black">
                 
-                                <div class="d-flex align-items-center mb-3 pb-1">
-                                    <span class="h2 fw-bold mb-0 text-white text-center">Admin Login</span>
-                                </div>
-                                <h5 class="fw-normal mb-3 pb-3 text-white" style="letter-spacing: 1px;">Sign into your account.</h5>
-                                    
-                                <?php 
-                                if(!empty($login_err)){
-                                    echo '<div class="alert alert-danger">' . $login_err . '</div>';
-                                }        
-                                ?>
-            
-                                <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
-                                    <div class="form-outline mb-4">
-                                        <label class="text-secondary">Username</label>
-                                        <input type="text" name="username" class="form-control <?php echo (!empty($username_err)) ? 'is-invalid' : ''; ?>" value="<?php echo $username; ?>">
-                                        <span class="invalid-feedback"><?php echo $username_err; ?></span>
-                                    </div>     
-                                    <div class="form-outline mb-4">
-                                        <label class="text-secondary">Password</label>
-                                        <input type="password" name="password" class="form-control <?php echo (!empty($password_err)) ? 'is-invalid' : ''; ?>">
-                                        <span class="invalid-feedback"><?php echo $password_err; ?></span>
-                                    </div>
-                            
-                                    <div class="pt-1 mb-4">
-                                        <input type="submit" class="btn btn-primary" value="LOGIN">
-                                    </div>
-                                    <!-- <p style="color: #6bedaf;">Don't have an account? <a href="register.php">Sign up now</a>.</p> -->
-                                    <a href="#!" class="small text-muted">Terms of use.</a>
-                                    <a href="#!" class="small text-muted">Privacy policy</a>
-                                </form>
+                <!-- USER LOGIN -->
+                <div class="col-md-6">
+                    <div class="card" style="border-radius: 1rem; background-color:#0d2533;">
+                        <div class="card-body text-white">
+                            <h2 class="text-center">User Login</h2>
+                            <h5 class="mb-3">Sign into your account.</h5>
 
-                            </div>
+                            <!-- Display login errors -->
+                            <?php if (!empty($login_err)) { echo '<div class="alert alert-danger">' . $login_err . '</div>'; } ?>
+
+                            <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
+                                <div class="form-group">
+                                    <label>Email</label>
+                                    <input type="text" name="email" class="form-control <?php echo (!empty($email_err)) ? 'is-invalid' : ''; ?>" value="<?php echo $email; ?>">
+                                    <span class="invalid-feedback"><?php echo $email_err; ?></span>
+                                </div>     
+
+                                <div class="form-group">
+                                    <label>Password</label>
+                                    <input type="password" name="password" class="form-control <?php echo (!empty($password_err)) ? 'is-invalid' : ''; ?>">
+                                    <span class="invalid-feedback"><?php echo $password_err; ?></span>
+                                </div>
+
+                                <!-- Department Dropdown -->
+                                <div class="form-group">
+                                    <label>Department</label>
+                                    <select name="department" class="form-control <?php echo (!empty($department_err)) ? 'is-invalid' : ''; ?>">
+                                        <option value="" selected disabled><--Select Department--></option>
+                                        <?php foreach ($departments as $id => $name): ?>
+                                            <option value="<?php echo $id; ?>" <?php echo ($department == $id) ? 'selected' : ''; ?>>
+                                                <?php echo $name; ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                    <span class="invalid-feedback"><?php echo $department_err; ?></span>
+                                </div>
+
+                                <div class="mt-3">
+                                    <input type="submit" class="btn btn-primary btn-block" value="LOGIN">
+                                </div>
+                                <p class="mt-3">Don't have an account? <a href="register.php">Sign up now</a>.</p>
+                            </form>
                         </div>
                     </div>
                 </div>
-                <div class="col col-md-6 col-lg-6 col-12" >
-                    <div class="card" style="border-radius: 1rem; background-color: #0d2533;">
-                        <div class="row g-0">
-                            <div class="card-body p-4 p-lg-5 text-black">
                 
-                                <div class="d-flex align-items-center mb-3 pb-1">
-                                    <span class="h2 fw-bold mb-0 text-white text-center">For Student</span>
-                                </div>
-                                <h5 class="fw-normal mb-3 pb-3 text-white" style="letter-spacing: 1px;">Search your Schedule &nbsp<a href="find-Schedule.php">Click here.</a></h5>
-                                    <a href="#!" class="small text-muted">Terms of use.</a>
-                                    <a href="#!" class="small text-muted">Privacy policy</a>
-                                </form>
-
-                            </div>
+                <!-- ADMIN LOGIN -->
+                <div class="col-md-6">
+                    <div class="card" style="border-radius: 1rem; background-color:rgb(224, 61, 11);">
+                        <div class="card-body text-white">
+                            <h2 class="text-center">Admin Login</h2>
+                            <h5 class="mb-3">Login as an admin. <a href="admin-login.php" class="text-light">Click here.</a></h5>
                         </div>
                     </div>
                 </div>
+
             </div>
         </div>
     </section>
 </body>
+</html>

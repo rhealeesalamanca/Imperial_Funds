@@ -92,62 +92,55 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 ?>
 
 <!DOCTYPE html>
-<html>
-<!-- Head -->  
-<?php include('includes/head.php');?> 
-<body>
+<html lang="en">
+
+<!-- Head -->
+<?php include('includes/head.php'); ?>
+
+<body style="background-color: #fefae0;">
     <div class="wrapper">
 
         <!-- Sidebar Holder -->
-        <?php include('includes/sidebar.php');?> 
+        <?php include('includes/sidebar.php'); ?>
 
         <!-- Page Content Holder -->
         <div id="content">
-            <?php include('includes/navbar.php');?>
+            <?php include('includes/navbar.php'); ?>
 
-            <!-- Jumbotron -->
-            <div class="p-4 shadow-4 rounded-3" style="background-color:#12081B;">
-                <h2>CREATE NEW RECORD</h2>                  
-                <hr class="my-4" />
-                <small style="font-size: small; color: #47748b;" class="pt-3 pb-2"><a href="index.php" class="text-light"><i class="fa-solid fa-house"></i><b>&nbsp;&nbsp;DASHBOARD</b></a>  &nbsp;&#124;&nbsp;  <i class=""></i><b>REQUESTS</b>  &nbsp;&#124;&nbsp;  <i class=""></i><b>Add Request</b></small>                                    
+            <!-- Header Section -->
+            <div class="p-4 shadow rounded-4 mb-4" style="background: linear-gradient(90deg, #FFD42A, #FFA500);">
+                <h2 class="text-dark fw-bold">CREATE NEW RECORD</h2>
+                <hr class="my-3" />
+                <small class="d-block text-dark">
+                    <a href="index.php" class="text-dark text-decoration-none">
+                        <i class="fa-solid fa-house"></i> <b>DASHBOARD</b>
+                    </a> &nbsp;|&nbsp;
+                    <b>REQUEST</b> &nbsp;|&nbsp;
+                    <b>ADD REQUEST</b>
+                </small>
             </div>
 
-            <!-- Home -->
-            <div class="container text-light">
-                <h3 style="color:#3b72f9;" class="pt-4">ADD REQUEST</h3>
-                <?php echo $page_err;?>
-            
-                <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post" enctype="multipart/form-data">
+            <!-- Form Section -->
+            <div class="container bg-white p-4 rounded-4 shadow-sm">
+                <h3 class="text-dark fw-bold">ADD REQUEST</h3>
+                <?php echo $page_err; ?>
+
+                <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post" enctype="multipart/form-data" class="pt-3">
                     <div class="row">
-                        <div class="col col-md-4 col-lg-4 col-12 pb-2">
-                            <label style="font-size:small;">Budget:</label>
-                            <input type="number" name="Budget" class="form-control <?php echo (!empty($Budget_err)) ? 'is-invalid' : ''; ?>" value="<?php echo $Budget; ?>">
-                            <span class="invalid-feedback"><?php echo $Budget_err;?></span>
+                        <div class="col-md-4 pb-3">
+                            <label class="form-label">Name:</label>
+                            <input type="text" name="Name" class="form-control rounded-3 uppercase-input <?php echo (!empty($Name_err)) ? 'is-invalid' : ''; ?>" value="<?php echo $Name; ?>" pattern="[A-Za-z\s]+" title="Only letters and spaces are allowed" oninput="this.value = this.value.replace(/[^A-Za-z\s]/g, '')">
+                            <span class="invalid-feedback"><?php echo $Name_err; ?></span>
                         </div>
-                    </div>
-                    <div class="row">
-                        <div class="col col-md-4 col-lg-4 col-12 pb-2">
-                            <label style="font-size:small;">Name:</label>
-                            <input type="text" name="Name" class="form-control uppercase-input <?php echo (!empty($Name_err)) ? 'is-invalid' : ''; ?>" 
-                                value="<?php echo $Name; ?>" 
-                                pattern="[A-Za-z\s]+" 
-                                title="Only letters and spaces are allowed" 
-                                oninput="this.value = this.value.replace(/[^A-Za-z\s]/g, '')">
-                            <span class="invalid-feedback"><?php echo $Name_err;?></span>
+                        <div class="col-md-4 pb-3">
+                            <label class="form-label">Budget:</label>
+                            <input type="number" name="Budget" class="form-control rounded-3 <?php echo (!empty($Budget_err)) ? 'is-invalid' : ''; ?>" value="<?php echo $Budget; ?>">
+                            <span class="invalid-feedback"><?php echo $Budget_err; ?></span>
                         </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-sm-12 col-md-12 col-lg-12 col-12 pb-2">
-                            <label style="font-size:small;">Purpose:</label>
-                            <input type="text" name="Purpose" class="form-control uppercase-input <?php echo (!empty($Purpose_err)) ? 'is-invalid' : ''; ?>" value="<?php echo $Purpose; ?>">
-                            <span class="invalid-feedback"><?php echo $Purpose_err;?></span>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col col-md-6 col-lg-6 col-12 pb-2">
-                            <label style="font-size:small;">Department:</label>
-                            <select name="DepartmentId" class="form-control <?php echo (!empty($DepartmentId_err)) ? 'is-invalid' : ''; ?>">
-                                <option value="" selected disabled><--Select Department--></option>
+                        <div class="col-md-4 pb-3">
+                            <label class="form-label">Department:</label>
+                            <select name="DepartmentId" class="form-control rounded-3 <?php echo (!empty($DepartmentId_err)) ? 'is-invalid' : ''; ?>">
+                                <option value="" selected disabled>← Select Department →</option>
                                 <?php foreach ($departmentIds as $id => $dept) : ?>
                                     <option value="<?php echo $id; ?>" <?php echo ($DepartmentId == $id) ? 'selected' : ''; ?>><?php echo $dept; ?></option>
                                 <?php endforeach; ?>
@@ -155,18 +148,52 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             <span class="invalid-feedback"><?php echo $DepartmentId_err; ?></span>
                         </div>
                     </div>
- 
+
                     <div class="row">
-                        <div class="col d-flex justify-content-between pt-3">
-                            <input type="submit" class="btn btn-primary" value="SUBMIT">
-                            <a class="btn btn-outline-secondary" href="manage-Request.php">MANAGE REQUEST</a>
+                        <div class="col-md-12 pb-3">
+                            <label class="form-label">Purpose:</label>
+                            <input type="text" name="Purpose" class="form-control rounded-3 uppercase-input <?php echo (!empty($Purpose_err)) ? 'is-invalid' : ''; ?>" value="<?php echo $Purpose; ?>">
+                            <span class="invalid-feedback"><?php echo $Purpose_err; ?></span>
                         </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between pt-4">
+                        <button type="submit" class="btn btn-secondary rounded-3 px-4">SUBMIT</button>
+                        <a href="manage-Request.php" class="btn btn-outline-secondary rounded-3 px-4">MANAGE REQUESTS</a>
                     </div>
                 </form>
             </div>
-
         </div>
     </div>
+
+    <!-- Custom CSS -->
+    <style>
+        .shadow {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .rounded-4 {
+            border-radius: 1rem;
+        }
+
+        .form-label {
+            font-weight: 600;
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+
+        .btn-outline-secondary:hover {
+            background-color: #6c757d;
+            color: #fff;
+        }
+    </style>
 
     <!-- jQuery CDN - Slim version (=without AJAX) -->
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
